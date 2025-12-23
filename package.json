@@ -1,0 +1,33 @@
+{
+  "name": "battleship-webgame",
+  "version": "1.0.0",
+  "description": "Battleship but on the web",
+  "keywords": [
+    "website"
+  ],
+  "homepage": "https://github.com/PlotChat/battleship-webgame#readme",
+  "bugs": {
+    "url": "https://github.com/PlotChat/battleship-webgame/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PlotChat/battleship-webgame.git"
+  },
+  "license": "ISC",
+  "author": "PlotChat",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "build": "npx webpack",
+    "dev": "npx webpack serve"
+  },
+  "devDependencies": {
+    "css-loader": "^7.1.2",
+    "html-loader": "^5.1.0",
+    "html-webpack-plugin": "^5.6.5",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.104.1",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.2"
+  }
+}
