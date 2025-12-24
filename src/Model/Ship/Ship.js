@@ -1,12 +1,14 @@
-import { validateName, validateNumber } from "../../Utils/validateInput";
+import { validateName, validateNumber, validateType } from "../../Utils/validateInput";
 
 export class Ship {
 	#name;
 	#length;
+	#location;
 
-	constructor({ name = "Default", length = 1 } = {}) {
+	constructor({ name = "Default", length = 1 , location = []} = {}) {
 		this.name = name;
 		this.length = length;
+		this.location = location;
 	}
 
 	set name(shipName) {
@@ -20,10 +22,18 @@ export class Ship {
 		this.#length = shipLength;
 	}
 
+	set location(locList){
+		validateType(locList, "Ship location list", Array);
+		this.#location = locList;
+	}
+
 	get name() {
 		return this.#name;
 	}
 	get length() {
 		return this.#length;
+	}
+	get location() {
+		return this.#location;
 	}
 }
