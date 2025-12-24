@@ -1,0 +1,5 @@
+export class Battleship extends Ship {
+	constructor() {
+		super({ name: "Battleship", length: 3 });
+	}
+}
