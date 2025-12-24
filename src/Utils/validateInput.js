@@ -25,24 +25,21 @@ export function validateNumber(value, content, type){
 }
 
 export function validateType(value, content, expectedType) {
-    validateExist(value, content);
+    if (expectedType === String) expectedType = "string";
+    if (expectedType === Number) expectedType = "number";
+    if (expectedType === Boolean) expectedType = "boolean";
 
-    if (expectedType === 'Array') {
-        if (!Array.isArray(value)) {
-            throw new Error(`${content} must be an Array`);
+    if (typeof expectedType === 'string') {
+        if (typeof value !== expectedType.toLowerCase()) {
+            throw new Error(`${content} must be of type ${expectedType}`);
         }
         return;
     }
 
     if (typeof expectedType === 'function') {
         if (!(value instanceof expectedType)) {
-            throw new Error(`${content} must be an instance of ${expectedType.name}`);
+             throw new Error(`${content} must be an instance of ${expectedType.name}`);
         }
-        return;
-    }
-
-    if (typeof value !== expectedType.toLowerCase()) {
-        throw new Error(`${content} must be of type ${expectedType}`);
     }
 }
 
