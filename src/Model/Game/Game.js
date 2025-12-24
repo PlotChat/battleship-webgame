@@ -1,31 +1,32 @@
-import {Player} from './Player/index';
+import { Player } from '../Player/index';
+import { validateType } from '../../Utils/validateInput';
 
-export default class Game{
-    #gridSize;
+export class Game {
     #players;
     #currentPlayer;
 
-    constructor(gridSize, players, currentPlayer){
-        this.gridSize = gridSize;
+    constructor({players = []} = {}){
         this.players = players;
-        this.currentPlayer = currentPlayer;
-    }
-
-    set gridSize(size) {
-        this.#gridSize = size;
     }
 
     set players(playerList) {
-        if (!Array.isArray(playerList)) throw new Error("Player list needs to be an Array");
+        validateType(playerList, "Player list" , Array);
+
+        if (!(playerList.length == 2 || playerList.length == 0)) 
+            throw new Error("There must be 0 or 2 players");
+        
+        playerList.forEach(player => {
+            validateType(player, "Player", Player);
+        });
+        
         this.#players = playerList;
     }
 
     set currentPlayer(player){
-        if(player instanceof Player == false) throw new Error("Current needs to be a Player object"); 
+        validateType(playerList, "Player", Player);
         this.#currentPlayer = player;
     }
 
-    get gridSize(){ return this.#gridSize };
     get players(){ return this.#players };
     get currentPlayer() { return this.#currentPlayer };
 }

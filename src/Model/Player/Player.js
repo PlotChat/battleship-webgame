@@ -1,12 +1,13 @@
-import { validateName } from '../../Utils/validateName';
+import { validateName, validateNumber, validateType } from "../../Utils/validateInput";
+import { Ship } from "../Ship";
 
 export class Player {
-	#name = "Player";
-	#points = 0;
+	#name;
+	#points;
 	#ships;
 	#turns;
 
-	constructor({ name, points, ships, turns } = {}) {
+	constructor({ name = "Player", points = 0, ships = [], turns = 0 } = {}) {
 		this.name = name;
 		this.points = points;
 		this.ships = ships;
@@ -15,14 +16,28 @@ export class Player {
 
 	set name(username) {
 		validateName(username, "User name");
-        this.#name = username;
+		this.#name = username;
 	}
 
-    set turns(totalTurns) {
-        if(totalTurns <= 0)
-            throw new Error("Total turns must be > 0");
-        this.#turns = totalTurns;
-    }
+	set points(value) {
+		validateNumber(value, "Player points", "Integer");
+		if (value < 0) throw new Error("Points must be >= 0");
+		this.#points = value;
+	}
+
+	set ships(arr) {
+		validateType(arr, "Ship list", Array);
+		arr.find(ship => {
+			validateType(ship, "Ship", Ship);
+		})
+		this.#ships = arr;
+	}
+
+	set turns(totalTurns) {
+		validateNumber(totalTurns, "Player turns", "Integer");
+		if (totalTurns < 0) throw new Error("Total turns must be > 0");
+		this.#turns = totalTurns;
+	}
 
 	get name() {
 		return this.#name;
@@ -33,7 +48,7 @@ export class Player {
 	get ships() {
 		return this.#ships;
 	}
-    get turns(){
-        return this.#turns;
-    }
+	get turns() {
+		return this.#turns;
+	}
 }
