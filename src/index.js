@@ -1,7 +1,8 @@
-import {data} from './Model/index'
+import {Carrier} from './Model/index'
 
-function iniApp(){
-
+function initApp(){
+    let c = new Carrier();
+    console.log(c);
 }
 
 initApp();
