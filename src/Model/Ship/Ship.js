@@ -2,13 +2,31 @@ import { validateName, validateNumber, validateType } from "../../Utils/validate
 
 export class Ship {
 	#name;
+	#health;
 	#length;
 	#location;
 
-	constructor({ name = "Default", length = 1 , location = []} = {}) {
+	constructor({ name = "Default", length = 1 , location = [], health = 0} = {}) {
 		this.name = name;
 		this.length = length;
 		this.location = location;
+		this.health = health;
+	}
+
+	receiveDamage(value){
+		validateNumber(value, "Damage", "Integer");
+		if(value < 0) throw Error("Damage must be positive");
+		
+		if(value >= health){
+			this.#health = 0;
+		} else{
+			this.#health -= value;
+		}
+	}
+
+	set health(hp){
+		validateNumber(hp, "Health", "Integer");
+		this.#health = hp;
 	}
 
 	set name(shipName) {
@@ -35,5 +53,8 @@ export class Ship {
 	}
 	get location() {
 		return this.#location;
+	}
+	get health(){
+		return this.#health;
 	}
 }
