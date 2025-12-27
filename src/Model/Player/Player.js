@@ -1,6 +1,10 @@
-import { validateName, validateNumber, validateType } from "../../Utils/validateInput";
-import { ArenaController } from '../../Controller/index';
-import { Ship, Arena } from "../../Model/index";
+import {
+	validateName,
+	validateNumber,
+	validateType,
+} from "../../Utils/validateInput";
+import { Ship, GameSettings } from "../../Model/index";
+import { ArenaController } from "../../Controller/index";
 
 export class Player {
 	#name;
@@ -8,20 +12,28 @@ export class Player {
 	#ships;
 	#turns;
 	#damage;
-	#controller = null;
+	#controller;
 
-	constructor({ name = "Player", points = 0, ships = [], turns = 0, damage = 1 } = {}) {
+	constructor({
+		name = "Player",
+		points = 0,
+		ships = GameSettings.getNewFleet(),
+		turns = 0,
+		damage = 1,
+		controller = new ArenaController({ size: 7 }),
+	} = {}) {
 		this.name = name;
 		this.points = points;
 		this.ships = ships;
 		this.turns = turns;
 		this.damage = damage;
+		this.controller = controller;
 	}
 
-	attackArena(blockLoc, target){
-		validateType(target, "Target arena", ArenaController);
+	attackArena(blockLoc, targetPlayer) {
+		validateType(targetPlayer, "Targeted Player", Player);
 
-		target.receiveAttack(blockLoc, this.#damage);
+		targetPlayer.controller.receiveAttack(blockLoc, this.#damage);
 	}
 
 	set name(username) {
@@ -37,9 +49,9 @@ export class Player {
 
 	set ships(arr) {
 		validateType(arr, "Ship list", Array);
-		arr.forEach(ship => {
+		arr.forEach((ship) => {
 			validateType(ship, "Ship", Ship);
-		})
+		});
 
 		this.#ships = arr;
 	}
@@ -51,13 +63,14 @@ export class Player {
 	}
 
 	set controller(obj) {
-		validateType(obj, "Object", Arena);
+		validateType(obj, "Object", ArenaController);
 		this.#controller = obj;
+		this.#controller.arena.ships = this.#ships;
 	}
 
-	set damage(value){
+	set damage(value) {
 		validateNumber(value, "Damage value", "Integer");
-		if(value < 0) value = 0;
+		if (value < 0) value = 0;
 
 		this.#damage = value;
 	}
@@ -77,7 +90,7 @@ export class Player {
 	get controller() {
 		return this.#controller;
 	}
-	get damage(){
+	get damage() {
 		return this.#damage;
 	}
 }
