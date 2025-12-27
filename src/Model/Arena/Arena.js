@@ -45,26 +45,24 @@ export class Arena {
 		this.#size = value;
 	}
 
-	removeShip(ship) {
-		validateType(ship, "Ship", Ship);
+    removeShip(ship) {
+        validateType(ship, "Ship", Ship);
+        
+        const index = this.#ships.findIndex(curr => {
+            if (curr.location.length === 0 || ship.location.length === 0) return false;
+            
+            return curr.location[0].x === ship.location[0].x && 
+                curr.location[0].y === ship.location[0].y;
+        });
 
-        let found = ships.find(curr => {
-            curr.locations === ship.locations;
-        })
+        if(index === -1) throw new Error("Ship not available to be removed");
 
-        if(!found) throw new Error("Ship not available to be removed");
-
-		for (let i = 0; i < this.#ships.length; i++) {
-			let curr = ships[i];
-			if (curr.locations === ship.locations) {
-				this.#ships.splice(i, 1);
-			}
-		}
-	}
+        this.#ships.splice(index, 1);
+    }
 
 	addShip(ship) {
 		validateType(ship, "Ship", Ship);
-        validateShip(this, ship);
+        ArenaRules.validateShip(this, ship);
         
         this.#ships.push(ship);
 	}

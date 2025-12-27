@@ -39,7 +39,9 @@ export class ArenaRules {
             let isAvailable = true;
             
             for(let i = 0; i < ship.location.length; i++){
-                if(!this.isAvailableShipLoc(loc)){
+                const loc = ship.location[i];
+                
+                if(!this.isAvailableShipLoc(arena, loc)){
                     isAvailable = false;
                     return;
                 }

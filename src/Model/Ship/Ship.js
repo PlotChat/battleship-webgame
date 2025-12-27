@@ -26,6 +26,8 @@ export class Ship {
 
 	set health(hp){
 		validateNumber(hp, "Health", "Integer");
+		if(hp < 0) throw new Error("Ship health must be positive");
+		
 		this.#health = hp;
 	}
 
