@@ -17,7 +17,7 @@ export class Ship {
 		validateNumber(value, "Damage", "Integer");
 		if(value < 0) throw Error("Damage must be positive");
 		
-		if(value >= health){
+		if(value >= this.#health){
 			this.#health = 0;
 		} else{
 			this.#health -= value;
