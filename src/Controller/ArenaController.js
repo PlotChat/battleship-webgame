@@ -1,5 +1,5 @@
 import { validateType } from "../Utils/validateInput";
-import { Ship, Arena, ArenaRules } from "../Model/index";
+import { Block, Arena, ArenaRules } from "../Model/index";
 
 export class ArenaController{
     #arena;
@@ -15,23 +15,42 @@ export class ArenaController{
     placeShipLoc(blockLoc) {
         if(this.#currShip === null)
             throw new Error("Must have a selected current ship");
-        if(this.#currShip.length === this.#currLocs.length)
-            throw new Error("Ship length exceeded. Cannot occupy more space");
         
         validateType(blockLoc, "Block location", Block);
 
+        if(this.#currShip.length === this.#currLocs.length)
+            throw new Error("Ship length exceeded. Cannot occupy more space");
+        
         let isAvailable = ArenaRules.isAvailableShipLoc(this.#arena, blockLoc);
 
-        validateShip(this.#arena, this.#currLocs);
-
-        if(isAvailable){
+        if (isAvailable) {
             this.#currLocs.push(blockLoc);
+        } else {
+             throw new Error("Spot already taken");
         }
 
-        if(this.#currShip.length === this.#currLocs.length){
-            this.#currLocs = [];
-            this.#arena.addShip(this.#currShip);
-            this.#currShip = null;
+        // Finalize Ship if Full
+        if (this.#currLocs.length === this.#currShip.length) {
+            
+            // Assign locations to the ship temporarily
+            this.#currShip.location = [...this.#currLocs];
+
+            try {
+                // Validate the shape
+                ArenaRules.validateShip(this.#arena, this.#currShip);
+                
+                // Add to Arena
+                this.#arena.addShip(this.#currShip);
+                
+                // Reset
+                this.#currShip = null;
+                this.#currLocs = [];
+            } catch (error) {
+                // If shape is invalid (e.g. L-shape), reset and warn
+                this.#currShip.location = []; 
+                this.#currLocs = [];
+                throw error;
+            }
         }
     }
 
