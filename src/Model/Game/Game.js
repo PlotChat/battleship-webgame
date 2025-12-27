@@ -1,9 +1,14 @@
-import { Player } from '../Player/index';
-import { validateType } from '../../Utils/validateInput';
+import { validateType } from '../../Utils/index';
+import { 
+    Player,
+    GameSettings
+} from '../../Model/index';
+import { ArenaController } from '../../Controller/index';
 
 export class Game {
     #players;
-    #currentPlayer;
+    #currPlayer;
+    #currController;
 
     constructor({players = []} = {}){
         this.players = players;
@@ -12,8 +17,8 @@ export class Game {
     set players(playerList) {
         validateType(playerList, "Player list" , Array);
 
-        if (!(playerList.length == 2 || playerList.length == 0)) 
-            throw new Error("There must be 0 or 2 players");
+        if (!(playerList.length == 0 || playerList.length == GameSettings.maxPlayers)) 
+            throw new Error(`There must be 0 or ${GameSettings.maxPlayers} players`);
         
         playerList.forEach(player => {
             validateType(player, "Player", Player);
@@ -22,11 +27,17 @@ export class Game {
         this.#players = playerList;
     }
 
-    set currentPlayer(player){
+    set currPlayer(player) {
         validateType(playerList, "Player", Player);
-        this.#currentPlayer = player;
+        this.#currPlayer = player;
+    }
+
+    set currController(controller) {
+        validateType(controller, "Arena controller", ArenaController);
+        this.#currController = controller;
     }
 
     get players(){ return this.#players };
-    get currentPlayer() { return this.#currentPlayer };
+    get currPlayer() { return this.#currPlayer };
+    get currController() { return this.#currController };
 }
