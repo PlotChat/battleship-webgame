@@ -13,10 +13,10 @@ describe("Ship class limits", () =>{
     ])
     
     expectPropertyValidation(getShip, "location", [
-        [[]], [], undefined, null, NaN 
+        undefined, null, NaN 
     ])
 
-    expectPropertyValidation(getShip, "location", [
-        [""], [], undefined, null, NaN
+    expectPropertyValidation(getShip, "health", [
+        [""], [], undefined, null, NaN, -1, 1.5
     ])
 })

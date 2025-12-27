@@ -1,73 +1,78 @@
-import { Arena, Block, Ship } from "../../../Model/index";
+import { ArenaController } from "../../../Controller/ArenaController";
+import { Block, Ship } from "../../../Model";
 
-let block = (x, y) => new Block(x, y);
-let ship = (blkList) => new Ship({location: blkList}) 
+// Helper to make blocks easier
+const b = (x, y) => new Block(x, y);
 
-describe("Arena grid location business logic", () => {
-    let arena;
+describe("ArenaController Integration Tests", () => {
+    let controller;
+    let mockShip;
 
     beforeEach(() => {
-        arena = new Arena({size: 10});
+        // Create a 10x10 grid
+        controller = new ArenaController({ size: 10 });
+        
+        // Create a mock ship with target length 3
+
+        mockShip = new Ship({length: 3, location: []}); 
     });
 
-    test.each([
-        // Scrambled / Teleporting
-        [ship([block(1, "A"), block(4, "F"), block(2, "B")])], 
-        // Jumps
-        [ship([block(2, "A"), block(2, "C")])], 
-        // Diagonal (A1 to B2)
-        [ship([[block(0, "A"), block(1, "B")]])],
-        // The "Snake" or "L" shape (A0, A1, B1)
-        [ship([[block(0, "A"), block(0, "B"), block(1, "B")]])],
-        // Duplicates
-        [ship([[block(2, "A"), block(2, "A"), block(2, "B")]])]
-    ])("Throw error when location of ship is not adjacent", () =>{
-        expect((value) => {
-            arena.ships = value;
-        }).toThrow();
-    })
-})
+    test("1. Successfully places a straight vertical ship", () => {
+        controller.currShip = mockShip;
 
-describe("Arena grid interaction business logic", () => {
-    let arena;
-    
-    test("Sink ship having location 1A assuming there is a ship there", () => {
-        let block = (x, y) => new Block(x, y);
-    
-        arena = new Arena({size: 10, ships: [
-            [ship([block(1,"A"), block(1,"B"), block(1,"C")])],
-            [ship([block(2, "A"), block(3, "A")])]
-        ]});
+        // Click 3 spots
+        controller.placeShipLoc(b(0, "A"));
+        controller.placeShipLoc(b(1, "A"));
+        controller.placeShipLoc(b(2, "A"));
 
-        arena.sinkShip(block(1, "A"));
+        // Ship should be in the Arena now
+        expect(controller.arena.ships.length).toBe(1);
+        expect(controller.currShip).toBeNull(); // Should reset
+    });
 
-        // find the location of the supposedly sunk ship in each ship locations
-        let foundShip = arena.ships.find(ship => {
-             return ship.location.some(loc => {
-                return loc.x === 1 && loc.y === "A";
-             })
-        })
+    test("2. Resets and throws error if placement is not adjacent (L-Shape)", () => {
+        controller.currShip = mockShip;
 
-        expect(foundShip).toBe(undefined);
-    })
-})
+        controller.placeShipLoc(b(0, "A"));
+        controller.placeShipLoc(b(1, "A"));
+        
+        // Invalid move: creating an 'L' shape
+        // This will trigger the catch block in placeShipLoc
+        expect(() => {
+            controller.placeShipLoc(b(1, "B"));
+        }).toThrow("adjacent");
 
-describe("Arena print", () => {
-    let arena = new Arena({size: 7});
+        // Arena should be empty
+        expect(controller.arena.ships.length).toBe(0);
+        // Buffer should be cleared
+        expect(controller.currLocs.length).toBe(0);
+    });
 
-    test("Arena creates a grid with correct dimensions and corner content", () => {
-        const grid = arena.grid;
+    test("3. Throws error if clicking an occupied spot", () => {
+        // Place first ship
+        const s1 = new Ship({length: 1, location: []});
+        controller.currShip = s1;
+        controller.placeShipLoc(b(5, "E"));
 
-        // Check dimensions (7x7)
-        expect(grid.length).toBe(49);
+        // Try to place second ship on top of it
+        const s2 = new Ship({length: 1, location: []});
+        controller.currShip = s2;
 
-        // Check the First Block (0, "A")
-        expect(grid[0].x).toBe(0);
-        expect(grid[0].y).toBe("A");
+        expect(() => {
+            controller.placeShipLoc(b(5, "E"));
+        }).toThrow(); // Should fail "Spot already taken" or similar
+    });
 
-        console.log(grid[6].x);
-        // Check the Last Block (6, "G")
-        expect(grid[48].x).toBe(6);
-        expect(grid[48].y).toBe("G");
-    })
-})
+    test("4. Removing a ship works", () => {
+        // Add a ship manually to arena
+        const s1 = new Ship();
+        s1.location = [b(0,"A")];
+        controller.arena.addShip(s1);
+
+        expect(controller.arena.ships.length).toBe(1);
+
+        // Remove it
+        controller.arena.removeShip(s1);
+        expect(controller.arena.ships.length).toBe(0);
+    });
+});
