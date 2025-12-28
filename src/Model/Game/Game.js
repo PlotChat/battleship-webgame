@@ -7,8 +7,8 @@ import { ArenaController } from '../../Controller/index';
 
 export class Game {
     #players;
-    #currPlayer;
-    #currController;
+    #currentPlayer;
+    #currentArenaController;
 
     constructor({players = []} = {}){
         this.players = players;
@@ -17,8 +17,8 @@ export class Game {
     set players(playerList) {
         validateType(playerList, "Player list" , Array);
 
-        if (!(playerList.length == 0 || playerList.length == GameSettings.maxPlayers)) 
-            throw new Error(`There must be 0 or ${GameSettings.maxPlayers} players`);
+        if (!(playerList.length >= 0 && playerList.length <= GameSettings.maxPlayers)) 
+            throw new Error(`There must be 0 or <= ${GameSettings.maxPlayers} players`);
         
         playerList.forEach(player => {
             validateType(player, "Player", Player);
@@ -27,17 +27,17 @@ export class Game {
         this.#players = playerList;
     }
 
-    set currPlayer(player) {
+    set currentPlayer(player) {
         validateType(playerList, "Player", Player);
-        this.#currPlayer = player;
+        this.#currentPlayer = player;
     }
 
-    set currController(controller) {
+    set currentArenaController(controller) {
         validateType(controller, "Arena controller", ArenaController);
-        this.#currController = controller;
+        this.#currentArenaController = controller;
     }
 
     get players(){ return this.#players };
-    get currPlayer() { return this.#currPlayer };
-    get currController() { return this.#currController };
+    get currentPlayer() { return this.#currentPlayer };
+    get currentArenaController() { return this.#currentArenaController };
 }
