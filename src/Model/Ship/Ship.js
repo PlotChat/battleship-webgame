@@ -3,7 +3,7 @@ import { validateName, validateNumber, validateType } from "../../Utils/validate
 export class Ship {
 	#name;
 	#health;
-	#length;
+	#size;
 	#location;
 
 	constructor({ name = "Default", length = 1 , location = [], health = 0} = {}) {
@@ -39,7 +39,7 @@ export class Ship {
 	set length(shipLength) {
 		validateNumber(shipLength, "Ship length", "Integer");
 		if (shipLength < 0) throw new Error("Ship length must be >= 0");
-		this.#length = shipLength;
+		this.#size = shipLength;
 	}
 
 	set location(locList){
@@ -47,11 +47,16 @@ export class Ship {
 		this.#location = locList;
 	}
 
+	set size(sz){
+		validateNumber(sz, "Ship size", "Integer");
+		this.#size = sz;
+	}
+
 	get name() {
 		return this.#name;
 	}
-	get length() {
-		return this.#length;
+	get size() {
+		return this.#size;
 	}
 	get location() {
 		return this.#location;
