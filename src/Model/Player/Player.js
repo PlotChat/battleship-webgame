@@ -3,76 +3,74 @@ import {
 	validateNumber,
 	validateType,
 } from "../../Utils/validateInput";
-import { Ship, GameSettings } from "../../Model/index";
-import { ArenaController } from "../../Controller/index";
+import { ArenaController } from "../../Controller/ArenaController";
+import { GameSettings } from "../Game";
 
 export class Player {
 	#name;
 	#points;
-	#ships;
 	#turns;
 	#damage;
+	#ownedShips;
 	#controller;
 
 	constructor({
 		name = "Player",
 		points = 0,
-		ships = GameSettings.getNewFleet(),
 		turns = 0,
 		damage = 1,
 		controller = new ArenaController({ size: 7 }),
+		ownedShips = GameSettings.getNewFleet(),
 	} = {}) {
 		this.name = name;
 		this.points = points;
-		this.ships = ships;
 		this.turns = turns;
 		this.damage = damage;
 		this.controller = controller;
+		this.ownedShips = ownedShips;
 	}
 
 	attackArena(blockLoc, targetPlayer) {
-		validateType(targetPlayer, "Targeted Player", Player);
+		validateType(targetPlayer, `Targeted Player`, Player);
 
-		targetPlayer.controller.receiveAttack(blockLoc, this.#damage);
+		// Returns true / false to know whether its a hit
+		return targetPlayer.controller.receiveAttack(blockLoc, this.#damage);
 	}
 
 	set name(username) {
-		validateName(username, "User name");
+		validateName(username, "A player's user name");
 		this.#name = username;
 	}
 
 	set points(value) {
-		validateNumber(value, "Player points", "Integer");
+		validateNumber(value, `Player: ${this.name}'s points`, "Integer");
 		if (value < 0) throw new Error("Points must be >= 0");
 		this.#points = value;
 	}
 
-	set ships(arr) {
-		validateType(arr, "Ship list", Array);
-		arr.forEach((ship) => {
-			validateType(ship, "Ship", Ship);
-		});
-
-		this.#ships = arr;
-	}
-
 	set turns(totalTurns) {
 		validateNumber(totalTurns, "Player turns", "Integer");
-		if (totalTurns < 0) throw new Error("Total turns must be > 0");
+		if (totalTurns < 0) throw new Error(`Player: ${this.name}'s total turns must be > 0`);
 		this.#turns = totalTurns;
 	}
 
 	set controller(obj) {
 		validateType(obj, "Object", ArenaController);
 		this.#controller = obj;
-		this.#controller.arena.ships = this.#ships;
 	}
 
 	set damage(value) {
-		validateNumber(value, "Damage value", "Integer");
+		validateNumber(value, `Player: ${this.name}'s damage value`, "Integer");
 		if (value < 0) value = 0;
 
 		this.#damage = value;
+	}
+
+	set ownedShips(ships) {
+		validateType(ships, "Owned ships", Array);
+		if(ships == 0) throw Error(`Player: ${this.name} must have at least a ship`);
+
+		this.#ownedShips = ships;
 	}
 
 	get name() {
@@ -80,9 +78,6 @@ export class Player {
 	}
 	get points() {
 		return this.#points;
-	}
-	get ships() {
-		return this.#ships;
 	}
 	get turns() {
 		return this.#turns;
@@ -92,5 +87,8 @@ export class Player {
 	}
 	get damage() {
 		return this.#damage;
+	}
+	get ownedShips() {
+		return this.#ownedShips;
 	}
 }
