@@ -1,6 +1,7 @@
 import { validateNumber, validateType } from "../../Utils/validateInput";
 import { ArenaRules } from "./ArenaRules";
-import { Block, Ship } from "../../Model/index";
+import { Block } from "../Block";
+import { Ship } from "../Ship";
 
 export class Arena {
 	#size;
