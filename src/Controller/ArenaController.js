@@ -1,54 +1,58 @@
 import { validateType } from "../Utils/validateInput";
-import { Block, Arena, ArenaRules } from "../Model/index";
+import { Block } from "../Model/Block/Block";
+import { Ship } from "../Model/Ship/Ship";
+import { Arena } from "../Model/Arena/Arena";
+import { ArenaRules } from "../Model/Arena/ArenaRules";
+
 
 export class ArenaController{
     #arena;
-    #currLocs;
-    #currShip = null;
+    #currentLocations;
+    #currentShip = null;
 
-    constructor({size = 0, ships = [], currLocs = []} = {}){
-        this.#arena = new Arena({size, ships});
-        this.currLocs = currLocs
+    constructor({arena = null, currentLocations = []} = {}){
+        this.#arena = arena;
+        this.currentLocations = currentLocations
     }
 
     // Places a ship location on the grid
     placeShipLoc(blockLoc) {
-        if(this.#currShip === null)
+        if(this.#currentShip === null)
             throw new Error("Must have a selected current ship");
         
         validateType(blockLoc, "Block location", Block);
 
-        if(this.#currShip.length === this.#currLocs.length)
+        if(this.#currentShip.length === this.#currentLocations.length)
             throw new Error("Ship length exceeded. Cannot occupy more space");
         
         let isAvailable = ArenaRules.isAvailableShipLoc(this.#arena, blockLoc);
 
         if (isAvailable) {
-            this.#currLocs.push(blockLoc);
+            this.#currentLocations.push(blockLoc);
         } else {
              throw new Error("Spot already taken");
         }
 
         // Finalize Ship if Full
-        if (this.#currLocs.length === this.#currShip.length) {
+        if (this.#currentLocations.length === this.#currentShip.size) {
             
             // Assign locations to the ship temporarily
-            this.#currShip.location = [...this.#currLocs];
+            this.#currentShip.location = [...this.#currentLocations];
 
             try {
                 // Validate the shape
-                ArenaRules.validateShip(this.#arena, this.#currShip);
+                ArenaRules.validateShip(this.#arena, this.#currentShip);
                 
                 // Add to Arena
-                this.#arena.addShip(this.#currShip);
+                this.#arena.addShip(this.#currentShip);
                 
                 // Reset
-                this.#currShip = null;
-                this.#currLocs = [];
+                this.#currentShip = null;
+                this.#currentLocations = [];
             } catch (error) {
                 // If shape is invalid (e.g. L-shape), reset and warn
-                this.#currShip.location = []; 
-                this.#currLocs = [];
+                this.#currentShip.location = []; 
+                this.#currentLocations = [];
                 throw error;
             }
         }
@@ -69,29 +73,66 @@ export class ArenaController{
         return shipLocIndex;
     }
 
-    receiveAttack(blockLoc, damage){
-        const shipLocIndex = this.findShipIndex(blockLoc);
-        this.#arena.ships[shipLocIndex].receiveDamage(damage);
-    }
-
-    sinkShip(blockLoc){
+    receiveAttack(blockLoc, damage) {
         const shipLocIndex = this.findShipIndex(blockLoc);
 
-        if (shipLocIndex === -1) return;
+        // 1. Handle the MISS
+        if (shipLocIndex === -1) {
+            console.log("Miss! Hit water.");
+            return false; // Return false so the UI knows it was a miss
+        }
 
-        this.#arena.ships.splice(shipLocIndex, 1);
+        // 2. Handle the HIT
+        const targetShip = this.#arena.ships[shipLocIndex];
+        targetShip.receiveDamage(damage);
+
+        // 3. Handle the SINK (Safe check)
+        if (targetShip.health <= 0) {
+            console.log(`You sunk the ${targetShip.name}!`);
+            this.sinkShip(targetShip);
+        }
+        
+        return true; // Return true so the UI knows it was a hit
     }
 
-    set currShip(ship) {
-        this.#currShip = ship;
+    sinkShip(ship) {
+        validateType(ship, "Ship", Ship);
+
+        const ships = this.#arena.ships;
+
+        // 1. Find the index of the ship
+        const index = ships.findIndex(curr => {
+            // Scenario A: It's the exact same object in memory
+            if (curr === ship) return true;
+
+            // Scenario B: It's a different object but holds the same data (for tests)
+            // Compare "Unique IDs" (like the starting coordinate)
+            if (curr.length !== ship.size) return false;
+            if (curr.location.length === 0 || ship.location.length === 0) return false;
+
+            // Check if they start at the same X,Y
+            return curr.location[0].x === ship.location[0].x && 
+                curr.location[0].y === ship.location[0].y;
+        });
+
+        // 2. If found, sink it (Remove from array)
+        if (index !== -1) {
+            ships.splice(index, 1);
+        } else {
+            throw new Error("Cannot find ship to sink");
+        }
     }
 
-    set currLocs(locs) {
+    set currentShip(ship) {
+        this.#currentShip = ship;
+    }
+
+    set currentLocations(locs) {
         validateType(locs, "Current location list ", Array);
-        this.#currLocs = locs;
+        this.#currentLocations = locs;
     }
 
-    get currLocs() { return this.#currLocs };
-    get currShip() { return this.#currShip };
+    get currentLocations() { return this.#currentLocations };
+    get currentShip() { return this.#currentShip };
     get arena(){ return this.#arena };
 }
