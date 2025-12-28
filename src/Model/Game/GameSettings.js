@@ -12,7 +12,8 @@ export class GameSettings{
             new Battleship(),
             new Carrier(),
             new Submarine(),
-            new Destroyer()
+            new Destroyer(),
+            new Cruiser()
         ];
     }
 
