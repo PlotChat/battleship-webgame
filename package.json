@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.28.5",
+    "@babel/node": "^7.28.0",
     "@babel/preset-env": "^7.28.5",
     "babel-jest": "^30.2.0",
     "css-loader": "^7.1.2",
@@ -37,5 +38,8 @@
     "moduleNameMapper": {
       "\\.(css|less)$": "<rootDir>/src/styleMock.js"
     }
+  },
+  "dependencies": {
+    "prompt-sync": "^4.2.0"
   }
 }
