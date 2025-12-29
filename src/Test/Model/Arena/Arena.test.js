@@ -1,4 +1,5 @@
 import { ArenaController } from "../../../Controller/ArenaController";
+import { Arena } from "../../../Model/Arena/Arena";
 import { Block, Ship } from "../../../Model";
 
 // Helper to make blocks easier
@@ -6,11 +7,13 @@ const b = (x, y) => new Block(x, y);
 
 describe("ArenaController Integration Tests", () => {
     let controller;
+    let arena;
     let mockShip;
 
     beforeEach(() => {
         // Create a 10x10 grid
-        controller = new ArenaController({ size: 10 });
+        arena = new Arena({size: 10}); 
+        controller = new ArenaController({ arena: arena });
         
         // Create a mock ship with target length 3
 
@@ -18,7 +21,7 @@ describe("ArenaController Integration Tests", () => {
     });
 
     test("1. Successfully places a straight vertical ship", () => {
-        controller.currShip = mockShip;
+        controller.currentShip = mockShip;
 
         // Click 3 spots
         controller.placeShipLoc(b(0, "A"));
@@ -26,12 +29,12 @@ describe("ArenaController Integration Tests", () => {
         controller.placeShipLoc(b(2, "A"));
 
         // Ship should be in the Arena now
-        expect(controller.arena.ships.length).toBe(1);
-        expect(controller.currShip).toBeNull(); // Should reset
+        expect(arena.ships.length).toBe(1);
+        expect(controller.currentShip).toBeNull(); // Should reset
     });
 
     test("2. Resets and throws error if placement is not adjacent (L-Shape)", () => {
-        controller.currShip = mockShip;
+        controller.currentShip = mockShip;
 
         controller.placeShipLoc(b(0, "A"));
         controller.placeShipLoc(b(1, "A"));
@@ -43,20 +46,20 @@ describe("ArenaController Integration Tests", () => {
         }).toThrow("adjacent");
 
         // Arena should be empty
-        expect(controller.arena.ships.length).toBe(0);
+        expect(arena.ships.length).toBe(0);
         // Buffer should be cleared
-        expect(controller.currLocs.length).toBe(0);
+        expect(controller.currentLocations.length).toBe(0);
     });
 
     test("3. Throws error if clicking an occupied spot", () => {
         // Place first ship
         const s1 = new Ship({length: 1, location: []});
-        controller.currShip = s1;
+        controller.currentShip = s1;
         controller.placeShipLoc(b(5, "E"));
 
         // Try to place second ship on top of it
         const s2 = new Ship({length: 1, location: []});
-        controller.currShip = s2;
+        controller.currentShip = s2;
 
         expect(() => {
             controller.placeShipLoc(b(5, "E"));
@@ -67,12 +70,12 @@ describe("ArenaController Integration Tests", () => {
         // Add a ship manually to arena
         const s1 = new Ship();
         s1.location = [b(0,"A")];
-        controller.arena.addShip(s1);
+        arena.addShip(s1);
 
-        expect(controller.arena.ships.length).toBe(1);
+        expect(arena.ships.length).toBe(1);
 
         // Remove it
-        controller.arena.removeShip(s1);
-        expect(controller.arena.ships.length).toBe(0);
+        arena.removeShip(s1);
+        expect(arena.ships.length).toBe(0);
     });
 });
