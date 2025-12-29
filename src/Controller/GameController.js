@@ -4,6 +4,11 @@ import PromptSync from "prompt-sync";
 const input = PromptSync();
 
 export class GameController{
+    // Default to real user input if nothing is passed
+    constructor(inputProvider = PromptSync()) { 
+        this.input = inputProvider;
+    }
+
     startGame(players) {
         const game = new Game({players: [...players]});
 
@@ -14,7 +19,7 @@ export class GameController{
             while(true){
                 console.log("=== Battleship ===");
                 console.log("1. Play with PC");
-                choice = input("Enter your choice: ");
+                choice = this.input("Enter your choice: ");
 
                 if(choice <= 0 || choice > 2){
                     console.log("Wrong choice, try again");
@@ -58,67 +63,72 @@ export class GameController{
             // Loop until all available ships are placed
             while(placedShips.length !== player.controller.arena.ships.length){
                 const pickedShip = this.handlePickShip(player);
+
+                if (!pickedShip) continue;
+
                 this.handlePlaceShip(placedShips, player, pickedShip);
             }
         })
     }
 
-    handlePickShip(player){
+handlePickShip(player){
         const arena = player.controller.arena;
-        // Print out available ships
         console.log("Your ships: ");
         for(let i = 0; i < arena.ships.length; i++){
             const curr = arena.ships[i];
-
-            console.log(`${i+1}. ${curr.name} - HP: ${curr.health}`)
+            // Only show ships that haven't been placed yet
+            const status = curr.location.length > 0 ? "[PLACED]" : "";
+            console.log(`${i+1}. ${curr.name} ${status} - HP: ${curr.health}`);
         }
         
-        // Let player pick a valid ship
         while(true){
-            const choice = input("Pick a ship to place on your arena: ");
-            if(choice > arena.ships.length || choice < 1){
+            const choice = this.input("Pick a ship to place on your arena: ");
+            const index = parseInt(choice) - 1; // [FIX 1] Convert "1" -> 0
+
+            if(isNaN(index) || index < 0 || index >= arena.ships.length){
                 console.log("Wrong input. Try again");
             } else {
-                return arena.ships[choice + 1];
+                const ship = arena.ships[index];
+                if (ship.location.length > 0) {
+                     console.log("You already placed this ship!");
+                     continue;
+                }
+                return ship;
             }
         }
     }
 
-    handlePlaceShip(placedShips, player, chosenShip){
+    handlePlaceShip(placedShips, player, chosenShip) {
         const controller = player.controller;
-        const arena = player.controller.arena;
-
-        controller.currentShip = chosenShip;
+        controller.selectShip(chosenShip);
         
-        // Show how grid looks like for the player to know where to place
-        // Then place the ship then have a confirmation
-        let choice;
+        let isShipDone = false;
 
-        // Loop until the player has placed all the chosen ship parts on the grid
-        while(controller.currentLocations !== controller.currentShip.size){
-            // Prints out current arena appearance
+        while (!isShipDone) {
             console.log("Your arena: ");
-            const gridUI = this.getGridUI(arena, placedShips);
+            const gridUI = this.getGridUI(controller.arena, placedShips);
             this.printGridUI(gridUI);
 
-            choice = input("Choose an arena to place the ship (eg: 2A): ");
+            const choice = this.input(`Place ${chosenShip.name} (${chosenShip.size} cells) (eg: 2A): `);
 
-            if(choice.length !== 2){
-                console.log("Invalid choice. Try again");
+            if (choice.length < 2) {
+                console.log("Invalid input. Format: 2A");
                 continue;
             }
 
-            // Place a ship on the grid data
-            const chosenBlock = new Block({x: choice.substring[0, 1], y: choice.substring(1, 2)});
-            try {
-                controller.placeShipLoc(chosenBlock);
-            } catch (error){
-                console.log(`Error: ${error}. Try again`);
-            }    
-        }
+            const rawY = choice.slice(-1).toUpperCase(); 
+            const rawX = choice.slice(0, -1); 
 
-        // Add ship to placedShips
-        placedShips.push(controller.currentShip);
+            const result = controller.processPlaceShipInput(rawX, rawY);
+
+            if (result.success) {
+                console.log(result.message);
+                isShipDone = result.isComplete;
+            } else {
+                console.log(`Error: ${result.message}`);
+            }
+        }
+        placedShips.push(chosenShip);
     }
 
     // Getting grid's data for interface (returns an array of Blocks)

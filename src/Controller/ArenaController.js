@@ -15,6 +15,88 @@ export class ArenaController{
         this.currentLocations = currentLocations
     }
 
+    processPlaceShipInput(rawX, rawY) {
+        if (!this.#currentShip) return { success: false, message: "No ship selected" };
+
+        try {
+            // 1. Parse Input (Fixing your number/string bug here)
+            const x = parseInt(rawX, 10); 
+            const y = rawY; // Keep as string "A", "B"... logic handles conversion
+            
+            // 2. Create Block (Controller handles the object creation)
+            const block = new Block( x, y );
+
+            // 3. Delegate to internal logic
+            this.#addLocationToCurrentShip(block);
+
+            // 4. Check if we are done
+            const isComplete = this.#currentLocations.length === this.#currentShip.size;
+            
+            if (isComplete) {
+                this.#finalizeShipPlacement();
+                return { success: true, message: "Ship Placed!", isComplete: true };
+            }
+
+            return { success: true, message: "Spot recorded.", isComplete: false };
+
+        } catch (error) {
+            return { success: false, message: error.message, isComplete: false };
+        }
+    }
+
+    selectShip(ship) {
+        validateType(ship, "Ship", Ship);
+        this.#currentShip = ship;
+        this.#currentLocations = []; // Reset locations when picking new ship
+    }
+
+    // Internal Helper (Logic from your old placeShipLoc)
+    #addLocationToCurrentShip(blockLoc) {
+        // Validation logic...
+        const isAvailable = ArenaRules.isAvailableShipLoc(this.#arena, blockLoc);
+        if (!isAvailable) throw new Error("Spot already taken");
+
+        // Prevent duplicates in current selection
+        const isDuplicate = this.#currentLocations.some(
+            l => l.x === blockLoc.x && l.y === blockLoc.y
+        );
+        if (isDuplicate) throw new Error("You already selected this spot");
+
+        this.#currentLocations.push(blockLoc);
+    }
+
+    // Internal Helper
+    #finalizeShipPlacement() {
+        // Create a "Shadow Ship" to test the placement
+        // We do NOT touch the real ship yet.
+        const shadowShip = new Ship({
+            name: this.#currentShip.name,
+            length: this.#currentShip.size,
+            location: [...this.#currentLocations] // Assign the candidate locations
+        });
+
+        try {
+            // Validate the Shadow
+            ArenaRules.validateShip(this.#arena, shadowShip);
+            
+            // Success, update the Real Ship
+            this.#currentShip.location = [...this.#currentLocations];
+            
+            this.#currentShip = null;
+            this.#currentLocations = [];
+        } catch (error) {
+            // If shadow failed, we never touched the real ship, so no rollback needed.
+            // Just clear local state.
+            this.#currentShip = null; // Optional: Force user to pick ship again on fail?
+            this.#currentLocations = [];
+
+            // Keep current ship and retry (optional)
+            // this.#currentShip ()
+            
+            throw error; 
+        }
+    }
+
     // Places a ship location on the grid
     placeShipLoc(blockLoc) {
         if(this.#currentShip === null)
