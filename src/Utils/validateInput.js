@@ -2,9 +2,12 @@ export function validateName(str, content){
     validateExist(str, content);
     if (typeof str !== "string") 
         throw new Error(`${content} must be a string`);
-    if (str.length <= 1)
+    if (str.trim().length <= 1)
         throw new Error(`${content} must be more than a character`);
-    if (/[^a-zA-Z]/.test(str)) 
+
+    const validNameRegex = /[^a-zA-Z0-9]/;
+
+    if (validNameRegex.test(str)) 
         throw new Error(`${content} must contain alphabetical characters`);
 }
 
