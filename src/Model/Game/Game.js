@@ -10,8 +10,10 @@ export class Game {
     #currentPlayer;
     #currentArenaController;
 
-    constructor({players = []} = {}){
+    constructor({players = [], currentArenaController = null, currentPlayer} = {}){
         this.players = players;
+        this.currentArenaController = currentArenaController;
+        this.currentPlayer = players[0];
     }
 
     set players(playerList) {
@@ -28,7 +30,7 @@ export class Game {
     }
 
     set currentPlayer(player) {
-        validateType(playerList, "Player", Player);
+        validateType(player, "Player", Player);
         this.#currentPlayer = player;
     }
 
