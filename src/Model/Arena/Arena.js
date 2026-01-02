@@ -68,6 +68,12 @@ export class Arena {
         this.#ships.push(ship);
 	}
 
+	findBlock(x, y){
+		return this.#grid.find(currentBlock => {
+            return currentBlock.x === x && currentBlock.y === y;
+        });
+	}
+
 	get size() {
 		return this.#size;
 	}
