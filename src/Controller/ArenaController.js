@@ -104,7 +104,7 @@ export class ArenaController{
         
         validateType(blockLoc, "Block location", Block);
 
-        if(this.#currentShip.length === this.#currentLocations.length)
+        if(this.#currentShip.size === this.#currentLocations.length)
             throw new Error("Ship length exceeded. Cannot occupy more space");
         
         let isAvailable = ArenaRules.isAvailableShipLoc(this.#arena, blockLoc);
@@ -171,13 +171,13 @@ export class ArenaController{
         // 3. Handle the SINK (Safe check)
         if (targetShip.health <= 0) {
             console.log(`You sunk the ${targetShip.name}!`);
-            this.sinkShip(targetShip);
+            this.removeShip(targetShip);
         }
         
         return true; // Return true so the UI knows it was a hit
     }
 
-    sinkShip(ship) {
+    removeShip(ship) {
         validateType(ship, "Ship", Ship);
 
         const ships = this.#arena.ships;

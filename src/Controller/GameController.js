@@ -1,77 +1,58 @@
-import { ArenaRules } from "../Model/Arena/ArenaRules";
-import { Block, Game, Player } from "../Model/index";
 import PromptSync from "prompt-sync";
+import { Game } from "../Model";
+import { validateType } from "../Utils";
+import { ViewController } from "./ViewController";
+
 const input = PromptSync();
 
 export class GameController{
+    #viewController;
+    #game;
+
     // Default to real user input if nothing is passed
-    constructor(inputProvider = PromptSync()) { 
+    constructor({inputProvider = PromptSync(), viewController = null, game = null} = {}) { 
         this.input = inputProvider;
+        this.viewController = viewController;
+        this.game = game;
     }
 
-    startGame(players) {
-        const game = new Game({players: [...players]});
-
-        outer:
-        while(true){
-            let choice;
-
-            while(true){
-                console.log("=== Battleship ===");
-                console.log("1. Play with PC");
-                choice = this.input("Enter your choice: ");
-
-                if(choice <= 0 || choice > 2){
-                    console.log("Wrong choice, try again");
-                } else break;
-            }
-
-            // Setting up game's current player to go first properties (first player in array goes first)
-            const firstPlayer = game.players[0];
-            game.currentPlayer = firstPlayer;
-            game.currentArenaController = firstPlayer.controller;
-
-            switch (choice){
-                case 1:
-                    handlePlayWithPC(game);
-                    break;
-                case 2:
-                    console.log("Exiting game...");
-                    break outer;
-                // case 3:
-                //     handlePlayWithPlayer();
-                //     break;
-                // This is a future feature
-            }
-        }
+    startGame() {
+        this.#viewController.displayMenuPage({playTrigger: () => this.handlePlayWithPC()})
     }
-
-    handlePlayWithPC(game){
+    
+    handlePlayWithPC(){
         // Make player place ships to start game
-        this.handlePickAndPlaceShip(game, true);
+        this.handlePickAndPlaceShip(true);
 
         // Then make the player fight the PC
-        this.handleBattle(game, true);
+        // this.handleBattle(game, true);
     }
 
-    handlePickAndPlaceShip(game, againstPC = false){
+    handlePickAndPlaceShip(againstPC = false){
+        if(againstPC == true){
+            this.#viewController.displayGameplayPage({game: this.#game, variant: "place"});
+        }
+
+        const placedShips = [];
+
+        
+
         // Each player in the game gets to pick and place their ships 
-        game.players.forEach(player => {
-            // Ships that are placed will be here
-            const placedShips = [];
+        // game.players.forEach(player => {
+        //     // Ships that are placed will be here
     
-            // Loop until all available ships are placed
-            while(placedShips.length !== player.controller.arena.ships.length){
-                const pickedShip = this.handlePickShip(player);
+        //     // Loop until all available ships are placed
+        //     while(placedShips.length !== player.controller.arena.ships.length){
+        //         const pickedShip = this.handlePickShip(player);
 
-                if (!pickedShip) continue;
+        //         if (!pickedShip) continue;
 
-                this.handlePlaceShip(placedShips, player, pickedShip);
-            }
-        })
+        //         this.handlePlaceShip(placedShips, player, pickedShip);
+        //     }
+        // })
     }
 
-handlePickShip(player){
+    handlePickShip(player){
         const arena = player.controller.arena;
         console.log("Your ships: ");
         for(let i = 0; i < arena.ships.length; i++){
@@ -186,6 +167,16 @@ handlePickShip(player){
 
     handleBattle(player, againstPC = false){
         throw new Error("Feature not implemented");
+    }
+
+    set viewController(controller){
+        validateType(controller, "View controller", ViewController);
+        this.#viewController = controller;
+    }
+
+    set game(obj){
+        validateType(obj, "Game", Game);
+        this.#game = obj;
     }
 }
 
