@@ -14,7 +14,7 @@ export function Tools({
 
 	const addButton = new Button({
 		content: "Add",
-		callback: toolsRemoveTrigger,
+		callback: toolsAddTrigger,
 	});
 
 	const shipsWrapper = new FlexBox();
@@ -36,7 +36,7 @@ export function Tools({
 
 	const removeButton = new Button({
 		content: "Remove",
-		callback: toolsAddTrigger,
+		callback: toolsRemoveTrigger,
 	});
 
     tools.append(addButton, shipsWrapper, removeButton);
