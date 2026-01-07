@@ -3,10 +3,12 @@ import { validateType, validateNumber } from '../../Utils/validateInput'
 export class Block{
     #x;
     #y;
+    #isShipLoc;
 
-    constructor(x = 0, y = 'A'){
+    constructor(x = 0, y = 'A', isShipLoc = false){
         this.x = x;
         this.y = y;
+        this.isShipLoc = isShipLoc;
     }
 
     set x(value){
@@ -19,6 +21,11 @@ export class Block{
         this.#y = value;
     }
 
+    set isShipLoc(value){
+        this.#isShipLoc = value;
+    }
+
     get x() { return this.#x };
     get y() { return this.#y };
+    get isShipLoc() { return this.#isShipLoc };
 }
