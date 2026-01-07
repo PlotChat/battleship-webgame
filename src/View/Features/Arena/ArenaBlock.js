@@ -1,24 +1,36 @@
+import { Battleship } from "../../../Model";
 import { Button } from "../../Components/Button";
+import './style/arena-block.css';
 
-const icons = {
+const buttonIcons = {
 	place: "➕",
 	attack: "⚔️",
-	sunk: "❌",
+	remove: "❌",
+	sunk: "💥",
 	water: "🔹",
 };
 
+const shipIcon = "🛳️";
+
+
 export function ArenaBlock({ parent = null, block, variant = "place", variantTrigger }) {
 	const arenaBlock = Button({
-		content: icons[variant],
+		content: !block.isShipLoc ? buttonIcons[variant] : shipIcon,
 		callback: () => variantTrigger(block, variant),
 		variant: "ghost",
 	});
+
 	arenaBlock.dataset.x = block.x;
 	arenaBlock.dataset.y = block.y;
 
 	arenaBlock.classList.add(`arena-block`);
 	arenaBlock.classList.add(`${parent}__arena-block`);
-	arenaBlock.classList.add(`arena-block--${variant}`);
+
+	if(!block.isShip){
+		arenaBlock.classList.add(`arena-block--${variant}`);
+	} else{
+		arenaBlock.classList.add(`arena-block--${shipIcon}`);
+	}
 
 	return arenaBlock;
 }

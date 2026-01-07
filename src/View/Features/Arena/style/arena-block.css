@@ -1,0 +1,25 @@
+.arena-block{
+    all: unset;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1/1;
+    overflow: hidden;
+
+    font-size: clamp(1rem, 2vw, 2rem);
+    
+    background-color: rgba(0, 187, 255, 0.263);
+    outline: blue 1.5px solid;
+    cursor: pointer;
+
+    transition: background-color 0.15s ease-in-out;
+}
+
+.arena-block--place:hover{
+    background-color: rgba(0, 187, 255, 0.496);
+    transition: background-color 0.05s ease-in-out;
+}
+
+.arena-block--remove:hover{
+    background-color: rgba(255, 0, 0, 0.193);
+    transition: background-color 0.05s ease-in-out;
+}

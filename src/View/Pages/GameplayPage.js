@@ -3,6 +3,7 @@ import { validateType } from "../../Utils";
 import { Tools } from "../Features/ToolsUI/Tools";
 import { Game } from "../../Model";
 import "./style/gameplay-page.css";
+
 export function GameplayPage({
 	game = null,
 	variant = null,

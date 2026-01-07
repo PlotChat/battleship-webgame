@@ -29,6 +29,7 @@ export function Tools({
 				game.currentArenaController.currentLocation = [];
 			},
 		});
+
 		shipButton.classList.add(`${parent}__tools--button`);
 
 		shipsWrapper.append(shipButton);

@@ -1,0 +1,7 @@
+.arena-board{
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    width: clamp(28rem, 70vw, 60rem);
+    margin: 0 auto;
+}

@@ -2,13 +2,6 @@
     width: 100%;
 }
 
-.gameplay-page__arena-board{
-    width: clamp(28rem, 60vw, 60rem);
-    gap: 0.5rem;
-    padding: 0 auto;
-    margin: 0 auto;
-}
-
 .gameplay-page__tools{
     position: fixed;
     width: 100%;
