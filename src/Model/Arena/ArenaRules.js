@@ -94,4 +94,16 @@ export class ArenaRules {
 
 		return true;
 	}
+
+	static isFromShipLoc(arena, blockLoc){
+		validateType(blockLoc, "Block", Block);
+
+		return arena.ships.some(ship => {
+			return ship.location.some(loc => {
+				if(blockLoc.x === loc.x && blockLoc.y === loc.y){
+					return true;
+				}
+			})
+		})
+	}
 }
