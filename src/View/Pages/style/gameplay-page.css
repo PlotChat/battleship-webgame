@@ -1,8 +1,22 @@
 .gameplay-page{
     width: 100%;
+    flex-direction: column;
+}
+
+.gameplay-page__title-wrapper{
+    margin-bottom: 2rem;
+    text-align: center;
+    flex-direction: column;
+}
+
+.gameplay-page__title{
+    font-size: 3rem;
+}
+
+.gameplay-page__subtitle{
+    font-size: 2rem;
 }
 
 .gameplay-page__tools{
-    position: fixed;
-    width: 100%;
+    margin-top: 2rem;
 }
