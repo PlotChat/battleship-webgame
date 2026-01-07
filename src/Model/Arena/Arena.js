@@ -58,12 +58,20 @@ export class Arena {
 
         if(index === -1) throw new Error("Ship not available to be removed");
 
+		ship.location.forEach(block => {
+			block.isShipLoc = false;
+        })
+
         this.#ships.splice(index, 1);
     }
 
 	addShip(ship) {
 		validateType(ship, "Ship", Ship);
         ArenaRules.validateShip(this, ship);
+
+		ship.location.forEach(block => {
+			block.isShipLoc = true;
+        })
         
         this.#ships.push(ship);
 	}
@@ -71,6 +79,13 @@ export class Arena {
 	findBlock(x, y){
 		return this.#grid.find(currentBlock => {
             return currentBlock.x === x && currentBlock.y === y;
+        });
+	}
+
+	findShip(ship){
+		validateType(ship, "Ship", Ship);
+		return this.#ships.find(currentShip => {
+            return currentShip === ship;
         });
 	}
 
