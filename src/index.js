@@ -9,7 +9,11 @@ function initApp() {
     let p1ArenaController = new ArenaController({ arena: p1Arena }); 
     let p1 = new Player({ name: "p1", controller: p1ArenaController });
 
-    let game = new Game({players: [p1], currentArenaController: p1ArenaController, currentPlayer: p1});
+    let p2Arena = new Arena({ size: 7 });
+    let p2ArenaController = new ArenaController({ arena: p2Arena }); 
+    let p2 = new Player({ name: "PC", controller: p2ArenaController });
+
+    let game = new Game({players: [p1, p2], currentArenaController: p1ArenaController, currentPlayer: p1});
 
     const appShell = document.getElementById("app-shell");
 

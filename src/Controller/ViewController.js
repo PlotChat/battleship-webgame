@@ -1,8 +1,10 @@
-import { GameplayPage } from "../View/Pages/GameplayPage";
+import { PickPage } from "../View/Pages/PickPage";
 import { MenuPage } from "../View/Pages/MenuPage";
 import { validateType } from "../Utils";
 import { Block } from "../Model/Block/index";
 import { ArenaController } from "./ArenaController";
+import { BattlePage } from "../View/Pages/BattlePage";
+import { Game } from "../Model";
 
 export class ViewController {
 	#game;
@@ -22,64 +24,89 @@ export class ViewController {
 		this.updateAppContainer(menuPage);
 	}
 
-    displayGameplayPage({ variant = "place" }) {
-        const gameplayPage = new GameplayPage({
-            game: this.#game,
-            variant: variant,
-            variantTrigger: (block, varType) => this.#variantTrigger(block, varType),
-            toolsAddTrigger: () => this.#toolsTrigger("place"),
-            toolsRemoveTrigger: () => this.#toolsTrigger("remove"),
-        });
+	displayPickPage({ variant = "place", callback = () => {} }) {
+		const pickPage = new PickPage({
+			game: this.#game,
+			variant: variant,
+			variantTrigger: (block, varType) => this.#variantTrigger(block, varType, callback),
+			toolsAddTrigger: () => this.#toolsTrigger("place", callback),
+			toolsRemoveTrigger: () => this.#toolsTrigger("remove", callback),
+            playButtonTrigger: callback,
+		});
 
-        this.updateAppContainer(gameplayPage);
-    }
+		this.updateAppContainer(pickPage);
+	}
 
-    #toolsTrigger(newVariant) {
-        this.displayGameplayPage({ variant: newVariant });
-    }
+	#toolsTrigger(newVariant, callback) {
+		this.displayPickPage({ variant: newVariant, callback: callback });
+	}
 
-    #variantTrigger(block, variant){
-        validateType(block, "Block", Block);
+	#variantTrigger(block, variant, callback) {
+		validateType(block, "Block", Block);
 
-        const arenaController = this.#game.currentArenaController;
-        
-        const clickedBlock = arenaController.arena.findBlock(block.x, block.y);
-        
-        if(arenaController.currentShip == null){
-            arenaController.currentShip = this.#game.currentPlayer.ownedShips[0];
-        } 
+		const arenaController = this.#game.currentArenaController;
 
-        if(variant == "place"){
-            try{
-                arenaController.placeShipLoc(clickedBlock);
-                console.log(`Success: shipLoc of ${arenaController.currentShip.name} placed at ${clickedBlock.x}${clickedBlock.y}`);
-            } catch(error){
-                console.log(`Error: ${error.stack}`);
-            }
-        } 
-        
-        else if (variant == "remove") {
-            const clickedShipIndex = arenaController.findShipIndex(clickedBlock);
-            const clickedShip = arenaController.arena.ships[clickedShipIndex];
-            this.#game.currentShip = clickedShip;
+		const clickedBlock = arenaController.arena.findBlock(block.x, block.y);
 
-            try {
-                const shipIndex = arenaController.findShipIndex(block);
-                
-                if (shipIndex === -1) {
-                    console.log("No ship here to remove.");
-                } else {
-                    const ship = arenaController.arena.ships[shipIndex];
-                    this.#game.removeShip(ship); 
-                    console.log("Success: Ship removed.");
-                }
-            } catch (error) {
-                console.warn(`Remove Error: ${error.message}`);
-            }
-        }
+		// Set arenaController's current ship to be player's first owned ship
+		if (arenaController.currentShip == null) {
+			arenaController.selectShip(this.#game.currentPlayer.ownedShips[0]);
+		}
 
-        this.displayGameplayPage({ variant: variant });
-    }
+		const currentShip = arenaController.currentShip;
+
+		if (variant == "place") {
+			try {
+				if (arenaController.placeShipLoc(clickedBlock)) {
+					console.log(
+						`Success: shipLoc of ${currentShip.name} placed at ${clickedBlock.x}${clickedBlock.y}`
+					);
+				} else {
+					console.log(`Failed: shipLoc of ${currentShip.name} wasn't placed`);
+				}
+			} catch (error) {
+				console.log(`Error: ${error.stack}`);
+			}
+		} else if (variant == "remove") {
+			try {
+				const shipIndex = arenaController.findShipIndex(block);
+
+				if (shipIndex === -1) {
+					console.log("No ship here to remove.");
+				} else {
+					const ship = arenaController.arena.ships[shipIndex];
+					arenaController.arena.removeShip(ship);
+					console.log(`Success: ${ship.name} removed.`);
+				}
+			} catch (error) {
+				console.warn(`Remove Error: ${error.message}`);
+			}
+		} else if (variant == "placeAttack") {
+			try{
+
+			} catch {
+
+			}
+		}
+
+		this.displayPickPage({ variant: variant, callback: callback });
+	}
+
+	#attackTrigger(){
+		if(this.#game.currentRound == this.#game.maxRounds){
+			alert("You win!");
+		}
+
+		
+	}
+
+	displayBattlePage({ variant }){
+		validateType(this.#game, "Game", Game);
+		if(variant == "pc"){
+			const battlePage = new BattlePage({ game: this.#game, variantTrigger: this.#variantTrigger, attackTrigger: this.#attackTrigger});
+			this.updateAppContainer(battlePage);
+		}
+	}
 
 	updateAppContainer(page) {
 		validateType(page, "Page", HTMLElement);

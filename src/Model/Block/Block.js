@@ -4,11 +4,13 @@ export class Block{
     #x;
     #y;
     #isShipLoc;
+    #isHit;
 
     constructor(x = 0, y = 'A', isShipLoc = false){
         this.x = x;
         this.y = y;
         this.isShipLoc = isShipLoc;
+        this.#isHit = false;
     }
 
     set x(value){
@@ -25,7 +27,12 @@ export class Block{
         this.#isShipLoc = value;
     }
 
+    set isHit(value){
+        this.#isHit = value;
+    }
+
     get x() { return this.#x };
     get y() { return this.#y };
     get isShipLoc() { return this.#isShipLoc };
+    get isHit() { return this.#isHit };
 }

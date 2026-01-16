@@ -43,7 +43,7 @@ export class ArenaRules {
                 
                 if(!this.isAvailableShipLoc(arena, loc)){
                     isAvailable = false;
-                    return;
+                    break;
                 }
             }
 

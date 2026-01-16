@@ -37,7 +37,14 @@ export class GameController{
     }
 
     handleBattle(player){
+        // if(this.#game.currentPlayer.ownedShips.length !== this.#game.currentArenaController.arena.ships.length){
+        //     console.log("Player needs to place all ships");
+        //     return;
+        // }
+
         if(player == "pc"){
+            const playerPC = this.#game.players.find((player) => player.name.toLowerCase() == "pc");
+            this.#game.currentArenaController = playerPC.controller;
             this.#viewController.displayBattlePage({ game: this.#game, variant: "pc" });
         }
     }
