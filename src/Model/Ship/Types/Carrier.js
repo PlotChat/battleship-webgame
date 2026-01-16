@@ -2,6 +2,6 @@ import { Ship } from '../Ship';
 
 export class Carrier extends Ship {
 	constructor() {
-		super({ name: "Carrier", length: 5, health: 5 });
+		super({ name: "Carrier", length: 5 });
 	}
 }
