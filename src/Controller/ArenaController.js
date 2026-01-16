@@ -1,7 +1,6 @@
 import { validateType } from "../Utils/validateInput";
 import { Block } from "../Model/Block/Block";
 import { Ship } from "../Model/Ship/Ship";
-import { Arena } from "../Model/Arena/Arena";
 import { ArenaRules } from "../Model/Arena/ArenaRules";
 
 
@@ -10,91 +9,16 @@ export class ArenaController{
     #currentLocations;
     #currentShip = null;
 
-    constructor({arena = null, currentLocations = []} = {}){
-        this.#arena = arena;
+    constructor({arena = null, currentLocations = [], currentShip = null} = {}){
+        this.arena = arena;
         this.currentLocations = currentLocations
-    }
-
-    processPlaceShipInput(rawX, rawY) {
-        if (!this.#currentShip) return { success: false, message: "No ship selected" };
-
-        try {
-            // 1. Parse Input (Fixing your number/string bug here)
-            const x = parseInt(rawX, 10); 
-            const y = rawY; // Keep as string "A", "B"... logic handles conversion
-            
-            // 2. Create Block (Controller handles the object creation)
-            const block = new Block( x, y );
-
-            // 3. Delegate to internal logic
-            this.#addLocationToCurrentShip(block);
-
-            // 4. Check if we are done
-            const isComplete = this.#currentLocations.length === this.#currentShip.size;
-            
-            if (isComplete) {
-                this.#finalizeShipPlacement();
-                return { success: true, message: "Ship Placed!", isComplete: true };
-            }
-
-            return { success: true, message: "Spot recorded.", isComplete: false };
-
-        } catch (error) {
-            return { success: false, message: error.message, isComplete: false };
-        }
+        this.currentShip = currentShip;
     }
 
     selectShip(ship) {
         validateType(ship, "Ship", Ship);
         this.#currentShip = ship;
         this.#currentLocations = []; // Reset locations when picking new ship
-    }
-
-    // Internal Helper (Logic from your old placeShipLoc)
-    #addLocationToCurrentShip(blockLoc) {
-        // Validation logic...
-        const isAvailable = ArenaRules.isAvailableShipLoc(this.#arena, blockLoc);
-        if (!isAvailable) throw new Error("Spot already taken");
-
-        // Prevent duplicates in current selection
-        const isDuplicate = this.#currentLocations.some(
-            l => l.x === blockLoc.x && l.y === blockLoc.y
-        );
-        if (isDuplicate) throw new Error("You already selected this spot");
-
-        this.#currentLocations.push(blockLoc);
-    }
-
-    // Internal Helper
-    #finalizeShipPlacement() {
-        // Create a "Shadow Ship" to test the placement
-        // We do NOT touch the real ship yet.
-        const shadowShip = new Ship({
-            name: this.#currentShip.name,
-            length: this.#currentShip.size,
-            location: [...this.#currentLocations] // Assign the candidate locations
-        });
-
-        try {
-            // Validate the Shadow
-            ArenaRules.validateShip(this.#arena, shadowShip);
-            
-            // Success, update the Real Ship
-            this.#currentShip.location = [...this.#currentLocations];
-            
-            this.#currentShip = null;
-            this.#currentLocations = [];
-        } catch (error) {
-            // If shadow failed, we never touched the real ship, so no rollback needed.
-            // Just clear local state.
-            this.#currentShip = null; // Optional: Force user to pick ship again on fail?
-            this.#currentLocations = [];
-
-            // Keep current ship and retry (optional)
-            // this.#currentShip ()
-            
-            throw error; 
-        }
     }
 
     // Places a ship location on the grid
@@ -104,20 +28,28 @@ export class ArenaController{
         
         validateType(blockLoc, "Block location", Block);
 
-        if(this.#currentShip.size === this.#currentLocations.length)
+        // Throws error when ship length is already enough, no need to place more
+        if(this.#currentShip.size <= this.#currentLocations.length)
             throw new Error("Ship length exceeded. Cannot occupy more space");
         
-        let isAvailable = ArenaRules.isAvailableShipLoc(this.#arena, blockLoc);
-
-        if (isAvailable) {
-            this.#currentLocations.push(blockLoc);
-        } else {
-             throw new Error("Spot already taken");
-        }
-
+        this.#currentLocations.push(blockLoc);
+        
         // Finalize Ship if Full
         if (this.#currentLocations.length === this.#currentShip.size) {
-            
+            if(this.#arena.findShip(this.#currentShip)){
+                this.#arena.removeShip(this.#currentShip);
+            }
+
+            // Check if the location(s) already taken
+            this.#currentLocations.forEach(loc => {
+                let isAvailable = ArenaRules.isAvailableShipLoc(this.#arena, loc);
+        
+                if (!isAvailable) {
+                    this.#currentLocations = [];
+                    throw new Error("Spot(s) already taken");
+                }
+            })
+
             // Assign locations to the ship temporarily
             this.#currentShip.location = [...this.#currentLocations];
 
@@ -128,9 +60,12 @@ export class ArenaController{
                 // Add to Arena
                 this.#arena.addShip(this.#currentShip);
                 
+                console.log(`${this.#currentShip.name} is placed`);
+
                 // Reset
-                this.#currentShip = null;
                 this.#currentLocations = [];
+                
+                return true;
             } catch (error) {
                 // If shape is invalid (e.g. L-shape), reset and warn
                 this.#currentShip.location = []; 
@@ -138,6 +73,8 @@ export class ArenaController{
                 throw error;
             }
         }
+
+        return false;
     }
 
     findShipIndex(blockLoc) {
@@ -177,34 +114,6 @@ export class ArenaController{
         return true; // Return true so the UI knows it was a hit
     }
 
-    removeShip(ship) {
-        validateType(ship, "Ship", Ship);
-
-        const ships = this.#arena.ships;
-
-        // 1. Find the index of the ship
-        const index = ships.findIndex(curr => {
-            // Scenario A: It's the exact same object in memory
-            if (curr === ship) return true;
-
-            // Scenario B: It's a different object but holds the same data (for tests)
-            // Compare "Unique IDs" (like the starting coordinate)
-            if (curr.length !== ship.size) return false;
-            if (curr.location.length === 0 || ship.location.length === 0) return false;
-
-            // Check if they start at the same X,Y
-            return curr.location[0].x === ship.location[0].x && 
-                curr.location[0].y === ship.location[0].y;
-        });
-
-        // 2. If found, sink it (Remove from array)
-        if (index !== -1) {
-            ships.splice(index, 1);
-        } else {
-            throw new Error("Cannot find ship to sink");
-        }
-    }
-
     set currentShip(ship) {
         this.#currentShip = ship;
     }
@@ -212,6 +121,10 @@ export class ArenaController{
     set currentLocations(locs) {
         validateType(locs, "Current location list ", Array);
         this.#currentLocations = locs;
+    }
+
+    set arena(arena){
+        this.#arena = arena;
     }
 
     get currentLocations() { return this.#currentLocations };
