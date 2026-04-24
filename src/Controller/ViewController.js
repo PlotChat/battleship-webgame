@@ -5,7 +5,7 @@ import { Block } from "../Model/Block/index";
 import { ArenaController } from "./ArenaController";
 import { BattlePage } from "../View/Pages/BattlePage";
 import { Game } from "../Model";
-import { GameController } from "./GameController";
+import { GameLogic } from "../Utils/GameLogic";
 
 export class ViewController {
 	#game;
@@ -99,7 +99,7 @@ export class ViewController {
 
 			try {
 				// Checking for winner
-				const winners = GameController.checkWinner(this.#game);
+				const winners = GameLogic.checkWinner(this.#game);
 				if (winners) {
 					this.displayBattlePage();
 					this.#toggleAllArenaBlockButtons();

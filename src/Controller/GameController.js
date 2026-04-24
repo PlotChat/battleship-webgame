@@ -86,32 +86,6 @@ export class GameController {
 		}
 	}
 
-	static checkWinner(game) {
-		let winners = [];
-
-		if (
-			game.currentRound == game.maxRounds ||
-			game.players.some((player) => {
-				return player.controller.arena.ships.length == 0;
-			})
-		) {
-			let maxPoints = Math.max(...game.players.map((player) => player.points));
-
-			game.players.forEach((player) => {
-				if (player.points == maxPoints) {
-					winners.push(player);
-				}
-			});
-
-			game.players.forEach(player => {
-				console.log(player.name + " " + player.points);
-			})
-			return winners;
-		}
-
-		return null;
-	}
-
 	set viewController(controller) {
 		if(controller !== null){
 			validateType(controller, "View controller", ViewController);
