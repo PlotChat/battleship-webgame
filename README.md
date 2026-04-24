@@ -15,22 +15,22 @@ Install this project if you want to!
 
 - Prerequisites: Make sure you have Node.js installed.
 
-- Clone the repo:
+1. Clone the repo:
 ```bash
     git clone https://github.com/username/repo-name.git
     cd repo-name
 ```
-Install dependencies:
+2. Install dependencies:
 ```Bash
 
     npm install
 ```
-Run locally:
+3. Run locally:
 ```Bash
 
     npm run dev
 ```
-Build for production to humble me:
+4. Build for production to humble me:
 ```Bash
 
     npm run build
