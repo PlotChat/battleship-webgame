@@ -4,11 +4,13 @@ import { Block } from "../Block";
 import { Ship } from "../Ship";
 
 export class Arena {
+	#name;
 	#size;
 	#ships;
 	#grid;
 
-	constructor({ size = 0, ships = [] } = {}) {
+	constructor({name = "Arena", size = 0, ships = [] } = {}) {
+		this.name = name;
 		this.size = size;
 		this.makeGrid(this.#grid, this.size);
 		this.ships = ships;
@@ -32,6 +34,53 @@ export class Arena {
 		this.#grid = [...gridTemp];
 	}
 
+	
+    removeShip(ship) {
+		validateType(ship, "Ship", Ship);
+        
+        const index = this.#ships.findIndex(curr => {
+			if (curr.location.length === 0 || ship.location.length === 0) return false;
+            
+            return curr.location[0].x === ship.location[0].x && 
+			curr.location[0].y === ship.location[0].y;
+        });
+		
+        if(index === -1) throw new Error("Ship not available to be removed");
+		
+		ship.location.forEach(block => {
+			block.isShipLoc = false;
+        })
+		
+        this.#ships.splice(index, 1);
+    }
+	
+	addShip(ship) {
+		validateType(ship, "Ship", Ship);
+        ArenaRules.validateShip(this, ship);
+		
+		ship.location.forEach(block => {
+			block.isShipLoc = true;
+        })
+        
+        this.#ships.push(ship);
+	}
+	
+	findBlock(x, y){
+		return this.#grid.find(currentBlock => {
+			return currentBlock.x === x && currentBlock.y === y;
+        });
+	}
+	
+	findShip(ship){
+		validateType(ship, "Ship", Ship);
+		return this.#ships.find(currentShip => {
+			return currentShip === ship;
+        });
+	}
+	
+	set name(name){
+		this.#name = name;
+	}
 	set ships(shipList) {
 		validateType(shipList, "Ship list", Array);
 		ArenaRules.validateShipList(this, shipList);
@@ -45,50 +94,10 @@ export class Arena {
 
 		this.#size = value;
 	}
-
-    removeShip(ship) {
-        validateType(ship, "Ship", Ship);
-        
-        const index = this.#ships.findIndex(curr => {
-            if (curr.location.length === 0 || ship.location.length === 0) return false;
-            
-            return curr.location[0].x === ship.location[0].x && 
-                curr.location[0].y === ship.location[0].y;
-        });
-
-        if(index === -1) throw new Error("Ship not available to be removed");
-
-		ship.location.forEach(block => {
-			block.isShipLoc = false;
-        })
-
-        this.#ships.splice(index, 1);
-    }
-
-	addShip(ship) {
-		validateType(ship, "Ship", Ship);
-        ArenaRules.validateShip(this, ship);
-
-		ship.location.forEach(block => {
-			block.isShipLoc = true;
-        })
-        
-        this.#ships.push(ship);
+	
+	get name(){
+		return this.#name;
 	}
-
-	findBlock(x, y){
-		return this.#grid.find(currentBlock => {
-            return currentBlock.x === x && currentBlock.y === y;
-        });
-	}
-
-	findShip(ship){
-		validateType(ship, "Ship", Ship);
-		return this.#ships.find(currentShip => {
-            return currentShip === ship;
-        });
-	}
-
 	get size() {
 		return this.#size;
 	}

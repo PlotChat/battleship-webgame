@@ -9,16 +9,16 @@ export function ArenaBoard({
 	arenaController = null,
 	variant = null,
 	variantTrigger = () => {},
+	hideShip = false,
 }) {
-	if (arenaController == null)
-		throw new Error(
-			"Arena Controller must be selected to be created as an ArenaBoard"
-		);
-	validateType(arenaController, "Game", ArenaController);
+	const arenaBoard = Grid();
 
+	if (arenaController == null){
+		return arenaBoard;
+	}
+		
 	const arena = arenaController.arena;
 
-	const arenaBoard = Grid();
 	arenaBoard.classList.add(`arena-board`);
 	arenaBoard.classList.add(`${parent}__arena-board`);
 	arenaBoard.style.gridTemplateColumns = `repeat(${arena.size}, 1fr)`;
@@ -29,6 +29,7 @@ export function ArenaBoard({
 			block: arena.grid[i],
 			variant: variant,
 			variantTrigger: variantTrigger,
+			hideShip: hideShip,
 		});
 
 		arenaBoard.appendChild(currentArenaBlock);

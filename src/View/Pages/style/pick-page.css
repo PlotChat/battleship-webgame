@@ -1,0 +1,38 @@
+.gameplay-page{
+    width: 100%;
+    flex-direction: column;
+}
+
+.gameplay-page__title-wrapper{
+    margin-bottom: 2rem;
+    text-align: center;
+    flex-direction: column;
+}
+
+.gameplay-page__title{
+    font-size: 3rem;
+}
+
+.gameplay-page__subtitle{
+    font-size: 2rem;
+}
+
+.gameplay-page__play-button{
+    width: 12rem;
+    padding: 0.5rem;
+    background-color: lightgreen;
+    border: solid 0.2rem rgb(8, 172, 8);
+    color: rgb(3, 57, 3);
+    margin: 2rem auto 0 auto;
+    cursor: pointer;
+    transition: background-color 0.1s ease-in-out;
+}
+
+.gameplay-page__play-button:hover{
+    background-color: rgb(92, 232, 92);;
+    transition: background-color 0.05s ease-in-out;
+}
+
+.gameplay-page__tools{
+    margin-top: 2rem;
+}

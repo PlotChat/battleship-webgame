@@ -27,33 +27,31 @@ export class ArenaRules {
 		});
 	}
 
-    static validateShip(arena, ship){
-        if (ship.location.length == 0) return;
+	static validateShip(arena, ship) {
+		if (ship.location.length == 0) return;
 
-			ship.location.forEach((loc) => {
-				validateType(loc, "Object", Block);
-			});
+		ship.location.forEach((loc) => {
+			validateType(loc, "Object", Block);
+		});
 
-			let isAdjacent = this.isAdjacentShip(ship.location);
-			let isOnGrid = this.isOnGridShip(arena, ship.location);
-            let isAvailable = true;
-            
-            for(let i = 0; i < ship.location.length; i++){
-                const loc = ship.location[i];
-                
-                if(!this.isAvailableShipLoc(arena, loc)){
-                    isAvailable = false;
-                    break;
-                }
-            }
+		let isAdjacent = this.isAdjacentShip(ship.location);
+		let isOnGrid = this.isOnGridShip(arena, ship.location);
+		let isAvailable = true;
 
-			if (!isAdjacent)
-				throw new Error("Location(s) of a ship must be adjacent");
-			if (!isOnGrid)
-				throw new Error("Location(s) of a ship must be on the grid");
-            if (!isAvailable)
-				throw new Error("Location(s) of a ship is already of another ship");
-    }
+		for (let i = 0; i < ship.location.length; i++) {
+			const loc = ship.location[i];
+
+			if (!this.isAvailableShipLoc(arena, loc)) {
+				isAvailable = false;
+				break;
+			}
+		}
+
+		if (!isAdjacent) throw new Error("Location(s) of a ship must be adjacent");
+		if (!isOnGrid) throw new Error("Location(s) of a ship must be on the grid");
+		if (!isAvailable)
+			throw new Error("Location(s) of a ship is already of another ship");
+	}
 
 	static isAdjacentShip(ship) {
 		if (ship.length <= 1) return true;
@@ -95,15 +93,27 @@ export class ArenaRules {
 		return true;
 	}
 
-	static isFromShipLoc(arena, blockLoc){
+	static isFromShipLoc(arena, blockLoc) {
 		validateType(blockLoc, "Block", Block);
 
-		return arena.ships.some(ship => {
-			return ship.location.some(loc => {
-				if(blockLoc.x === loc.x && blockLoc.y === loc.y){
+		return arena.ships.some((ship) => {
+			return ship.location.some((loc) => {
+				if (blockLoc.x === loc.x && blockLoc.y === loc.y) {
 					return true;
 				}
-			})
-		})
+			});
+		});
+	}
+
+	// Check if any blocks are overlapping each other
+	static isOverlapLocations(locs) {
+		const coordinates = locs.map(loc => 
+			`${loc.x},${loc.y}`
+		);
+
+		const isSet = (arr) => new Set(arr).size === arr.length;
+
+		if (isSet(coordinates)) return false;
+		return true;
 	}
 }

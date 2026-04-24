@@ -19,11 +19,11 @@ export class Game {
 		this.players = players;
 		this.currentArenaController = currentArenaController;
 		this.currentPlayer = currentPlayer;
-        
-        if(!(maxRounds || currentRound)){
-            this.#maxRounds = Math.pow(this.#currentArenaController.arena.size, 2);
-            this.#currentRound = 1;
-        }
+
+		if (!(maxRounds || currentRound)) {
+			this.#maxRounds = Math.pow(this.#currentArenaController.arena.size, 2);
+			this.#currentRound = 1;
+		}
 	}
 
 	set players(playerList) {
@@ -49,7 +49,9 @@ export class Game {
 	}
 
 	set currentArenaController(controller) {
-		validateType(controller, "Arena controller", ArenaController);
+		if (controller !== null) {
+			validateType(controller, "Arena controller", ArenaController);
+		}
 		this.#currentArenaController = controller;
 	}
 

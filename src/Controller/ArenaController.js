@@ -9,7 +9,7 @@ export class ArenaController{
     #currentLocations;
     #currentShip = null;
 
-    constructor({arena = null, currentLocations = [], currentShip = null} = {}){
+    constructor({ arena = null, currentLocations = [], currentShip = null} = {}){
         this.arena = arena;
         this.currentLocations = currentLocations
         this.currentShip = currentShip;
@@ -27,13 +27,13 @@ export class ArenaController{
             throw new Error("Must have a selected current ship");
         
         validateType(blockLoc, "Block location", Block);
-
+        
         // Throws error when ship length is already enough, no need to place more
         if(this.#currentShip.size <= this.#currentLocations.length)
             throw new Error("Ship length exceeded. Cannot occupy more space");
         
         this.#currentLocations.push(blockLoc);
-        
+
         // Finalize Ship if Full
         if (this.#currentLocations.length === this.#currentShip.size) {
             if(this.#arena.findShip(this.#currentShip)){
@@ -42,9 +42,10 @@ export class ArenaController{
 
             // Check if the location(s) already taken
             this.#currentLocations.forEach(loc => {
-                let isAvailable = ArenaRules.isAvailableShipLoc(this.#arena, loc);
-        
-                if (!isAvailable) {
+                const isAvailable = ArenaRules.isAvailableShipLoc(this.#arena, loc);
+                const isOverlapLocations = ArenaRules.isOverlapLocations(this.#currentLocations);
+                
+                if (!isAvailable || isOverlapLocations) {
                     this.#currentLocations = [];
                     throw new Error("Spot(s) already taken");
                 }
@@ -70,11 +71,11 @@ export class ArenaController{
                 // If shape is invalid (e.g. L-shape), reset and warn
                 this.#currentShip.location = []; 
                 this.#currentLocations = [];
-                throw error;
+                throw new Error("Locations placed are invalid");
             }
         }
 
-        return false;
+        return true;
     }
 
     findShipIndex(blockLoc) {
@@ -95,9 +96,10 @@ export class ArenaController{
     receiveAttack(blockLoc, damage) {
         const shipLocIndex = this.findShipIndex(blockLoc);
 
+        console.log(`Arena: ${this.#arena.name} got hit!`)
         // 1. Handle the MISS
         if (shipLocIndex === -1) {
-            console.log("Miss! Hit water.");
+            console.log(`But hit miss! Hit water.`);
             return false; // Return false so the UI knows it was a miss
         }
 
@@ -107,8 +109,8 @@ export class ArenaController{
 
         // 3. Handle the SINK (Safe check)
         if (targetShip.health <= 0) {
-            console.log(`You sunk the ${targetShip.name}!`);
-            this.removeShip(targetShip);
+            console.log(`${targetShip.name} got sunk!`);
+            this.#arena.removeShip(targetShip);
         }
         
         return true; // Return true so the UI knows it was a hit

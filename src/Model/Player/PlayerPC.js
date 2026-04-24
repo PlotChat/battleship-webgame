@@ -6,14 +6,14 @@ import { Player } from "./Player";
 import { Ship } from "../Ship";
 
 export class PlayerPC extends Player {
-	constructor(
-		name,
+	constructor({
+		name = "Player",
 		points = 0,
 		turns = 0,
 		damage = 1,
 		controller = new ArenaController({ size: 7 }),
-		ownedShips = GameSettings.getNewFleet()
-	) {
+		ownedShips = GameSettings.getNewFleet(),
+	} = {}) {
 		super({
 			name: name,
 			points: points,
@@ -30,40 +30,46 @@ export class PlayerPC extends Player {
 			while (!placed) {
 				let tempLocs = [];
 
-				// 1. Pick a random START block (0-6)
+				// 1. Pick a random START coordinate (0-6)
 				const startX = Math.floor(Math.random() * this.controller.arena.size);
 				const startYNum = Math.floor(
 					Math.random() * this.controller.arena.size
 				);
 
-				// 2. Pick a fixed direction: 0 = Horizontal, 1 = Vertical
+				// 2. Pick a fixed direction
 				const isVertical = Math.random() > 0.5;
 
-				// 3. Build the ship out in a straight line
-				for (let i = 0; i < ship.length; i++) {
+				// 3. Build the ship out
+				for (let i = 0; i < ship.size; i++) {
 					const currentX = isVertical ? startX : startX + i;
 					const currentYNum = isVertical ? startYNum + i : startYNum;
 
-					// Ensure Y is a Letter for your ArenaRules
+					// Ensure Y is a Letter (0 -> A, 1 -> B)
 					const currentY = String.fromCharCode(65 + currentYNum);
 
-					tempLocs.push(new Block({ x: currentX, y: currentY }));
+					// Pass currentX (the number) and currentY (the string)
+					tempLocs.push(new Block(currentX, currentY, true));
 				}
 
 				// 4. Validate and Save
 				const tempShip = new Ship({ location: tempLocs });
 				try {
-					// Check if it's on grid and not overlapping others
 					ArenaRules.validateShip(this.controller.arena, tempShip);
-
 					ship.location = tempLocs;
-					// IMPORTANT: Push to arena so the NEXT ship doesn't overlap this one
 					this.controller.arena.ships.push(ship);
 					placed = true;
+
+					this.controller.arena.grid.forEach((block) => {
+                        tempLocs.forEach(loc => {
+                            if(block.x == loc.x && block.y == loc.y){
+                                block.isShipLoc = true;
+                            }
+                        })
+                    });
 				} catch (e) {
-					// If it hits a wall or another ship, the 'while' loop tries again
+					// Overlap or Out of Bounds, try again
 				}
 			}
-		})
+		});
 	}
 }

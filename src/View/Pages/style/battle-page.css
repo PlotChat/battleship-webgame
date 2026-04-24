@@ -1,0 +1,8 @@
+.battle-page{
+    flex-direction: column;
+    gap: 3rem;
+}
+
+.battle-page__title-wrapper{
+    flex-direction: column;
+}
